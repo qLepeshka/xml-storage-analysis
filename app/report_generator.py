@@ -6,10 +6,12 @@ import os
 class ReportGenerator:
     def __init__(self):
         self.template_dir = "templates"
-        self.output_dir = "reports"
+        self.output_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "reports")
 
-        if not os.path.exists(self.output_dir):
-            os.makedirs(self.output_dir)
+        try:
+            os.makedirs(self.output_dir, exist_ok=True)
+        except FileExistsError:
+            pass
 
     def generate_report(self, test_results, visualizations=None):
         if isinstance(test_results, dict):

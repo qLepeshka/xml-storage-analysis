@@ -120,8 +120,10 @@ class Application:
 
         viz_dir = self.config_manager.get('output_settings.visualization_dir')
         import os
-        if not os.path.exists(viz_dir):
-            os.makedirs(viz_dir)
+        try:
+            os.makedirs(viz_dir, exist_ok=True)
+        except FileExistsError:
+            pass
 
         for name, fig in visualizations.items():
             filepath = os.path.join(viz_dir, f"{name}.html")
