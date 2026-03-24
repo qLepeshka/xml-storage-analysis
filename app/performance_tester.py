@@ -131,6 +131,9 @@ class PerformanceTester:
     def get_results_dataframe(self):
         rows = []
 
+        if isinstance(self.test_results, list):
+            return pd.DataFrame(self.test_results)
+
         for db_type, db_results in self.test_results.items():
             for method_name, method_results in db_results.items():
                 for operation, op_result in method_results.items():

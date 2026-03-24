@@ -14,7 +14,9 @@ class ReportGenerator:
             pass
 
     def generate_report(self, test_results, visualizations=None):
-        if isinstance(test_results, dict):
+        if isinstance(test_results, pd.DataFrame):
+            df = test_results
+        elif isinstance(test_results, dict):
             df = self._convert_results_to_dataframe(test_results)
         else:
             df = test_results
