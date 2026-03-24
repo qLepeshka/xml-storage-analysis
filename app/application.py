@@ -249,8 +249,10 @@ class Application:
 
         visualizations = self.visualizer.generate_all_visualizations(df)
 
-        viz_dir = self.config_manager.get('output_settings.visualization_dir')
+        # Используем абсолютный путь
         import os
+        base_dir = os.path.dirname(os.path.dirname(__file__))
+        viz_dir = os.path.join(base_dir, "visualizations")
         try:
             os.makedirs(viz_dir, exist_ok=True)
         except FileExistsError:
@@ -310,10 +312,21 @@ class Application:
             print_progress_bar(i + 1, 3)
             time.sleep(0.3)
 
-        report_path = self.report_generator.generate_report(
-            df,
-            visualizations
-        )
+        # Используем абсолютный путь
+        import os
+        base_dir = os.path.dirname(os.path.dirname(__file__))
+        report_dir = os.path.join(base_dir, "reports")
+        try:
+            os.makedirs(report_dir, exist_ok=True)
+        except FileExistsError:
+            pass
+
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        report_filename = f"xml_storage_analysis_report_{timestamp}.html"
+        report_path = os.path.join(report_dir, report_filename)
+
+        self.report_generator.output_dir = report_dir
+        self.report_generator.generate_report(df, visualizations)
 
         print()
         print_success(f"Отчёт сгенерирован: {report_path}")
