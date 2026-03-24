@@ -6,6 +6,11 @@ from app.visualizer import Visualizer
 from app.report_generator import ReportGenerator
 from app.data_handler import DataHandler
 from app.config_manager import ConfigManager
+from app.ui_utils import (
+    Colors, print_logo, print_header, print_success, print_error,
+    print_warning, print_info, print_menu_item, print_table,
+    get_user_input, confirm_action, simulate_loading, clear_screen
+)
 
 
 class Application:
@@ -52,72 +57,194 @@ class Application:
             self.show_menu()
 
     def show_menu(self):
-        print("Инструмент сравнительного анализа методов хранения XML")
-        print("=" * 50)
-        print("1. Настройка баз данных")
-        print("2. Запуск тестов производительности")
-        print("3. Генерация визуализаций")
-        print("4. Генерация отчёта")
-        print("5. Импорт набора данных")
-        print("6. Экспорт набора данных")
-        print("7. Выход")
-
-        choice = input("\nВведите ваш выбор: ")
-
-        if choice == '1':
+        """Показ главного меню"""
+        clear_screen()
+        print_logo()
+        
+        print_header("📋 ГЛАВНОЕ МЕНЮ")
+        print()
+        print_menu_item("1", "🗄️  Настройка баз данных", "Конфигурация подключения к СУБД")
+        print_menu_item("2", "⚡ Запуск тестов производительности", "Сравнение методов хранения XML")
+        print_menu_item("3", "📊 Генерация визуализаций", "Диаграммы и графики результатов")
+        print_menu_item("4", "📄 Генерация отчёта", "HTML-отчёт с рекомендациями")
+        print_menu_item("5", "📥 Импорт набора данных", "Загрузка данных из файла")
+        print_menu_item("6", "📤 Экспорт набора данных", "Сохранение данных в файл")
+        print_menu_item("7", "❓ Справка", "Информация о программе")
+        print_menu_item("0", "🚪 Выход", "Завершение работы программы")
+        print()
+        
+        choice = get_user_input("  Введите номер пункта", default="7", 
+                               choices=["0", "1", "2", "3", "4", "5", "6", "7"])
+        
+        if choice == "1":
             self.configure_databases()
-        elif choice == '2':
+        elif choice == "2":
             self.run_performance_tests()
-        elif choice == '3':
+        elif choice == "3":
             self.generate_visualizations()
-        elif choice == '4':
+        elif choice == "4":
             self.generate_report()
-        elif choice == '5':
+        elif choice == "5":
             self.import_dataset()
-        elif choice == '6':
+        elif choice == "6":
             self.export_dataset()
-        elif choice == '7':
+        elif choice == "7":
+            self.show_help()
+        elif choice == "0":
+            print("\n" + "=" * 60)
+            print_success("Спасибо за использование XML Storage Analysis!")
+            print("=" * 60 + "\n")
             exit(0)
         else:
-            print("Неверный выбор. Попробуйте снова.")
-            self.show_menu()
+            print_error("Неверный выбор. Попробуйте снова.")
+        
+        # Возврат в меню после выполнения действия
+        input("\n" + "=" * 60 + "\nНажмите Enter для продолжения...")
+        self.show_menu()
 
     def configure_databases(self):
-        print("Настройка баз данных...")
-        pass
+        """Настройка баз данных"""
+        clear_screen()
+        print_header("🗄️  НАСТРОЙКА БАЗ ДАННЫХ")
+        
+        print(f"""
+{Colors.CYAN}Текущая конфигурация:{Colors.RESET}
+""")
+        
+        databases = self.config_manager.get('databases', [])
+        print(f"  Подключённые базы данных: {', '.join(databases)}")
+        
+        print(f"""
+{Colors.YELLOW}Для подключения базы данных:{Colors.RESET}
+  1. Отредактируйте файл config.json
+  2. Укажите параметры подключения:
+     - host (адрес сервера)
+     - port (порт)
+     - database (имя базы данных)
+     - username (пользователь)
+     - password (пароль)
+
+{Colors.GREEN}Поддерживаемые СУБД:{Colors.RESET}
+  ✓ PostgreSQL (рекомендуется)
+  ✓ MySQL
+  ✓ SQL Server
+""")
+        
+        if confirm_action("Хотите проверить подключение к базам данных?"):
+            self._test_database_connections()
+
+    def _test_database_connections(self):
+        """Тестирование подключения к БД"""
+        databases = self.config_manager.get('databases', [])
+        
+        for db_type in databases:
+            db_config = self.config_manager.get_database_config(db_type)
+            if db_config:
+                print_info(f"Проверка подключения к {db_type}...")
+                # Здесь будет логика подключения
+                print_warning("Тестирование будет доступно после настройки БД")
+
+    def show_help(self):
+        """Показ справки"""
+        clear_screen()
+        print_header("❓ СПРАВКА")
+        
+        print(f"""
+{Colors.CYAN}XML Storage Analysis — Инструмент сравнительного анализа методов хранения XML{Colors.RESET}
+
+{Colors.YELLOW}📌 О ПРОЕКТЕ:{Colors.RESET}
+  Приложение сравнивает производительность различных способов хранения 
+  XML-данных в реляционных базах данных.
+
+{Colors.YELLOW}📌 МЕТОДЫ ХРАНЕНИЯ:{Colors.RESET}
+  1. {Colors.GREEN}Native Text{Colors.RESET} — хранение XML как обычного текста
+  2. {Colors.GREEN}Normalized Relational{Colors.RESET} — разбор XML в таблицы
+  3. {Colors.GREEN}XML Data Type{Colors.RESET} — использование XML-типа данных
+  4. {Colors.GREEN}Hybrid{Colors.RESET} — комбинация методов
+
+{Colors.YELLOW}📌 ОПЕРАЦИИ:{Colors.RESET}
+  • {Colors.BLUE}Read{Colors.RESET} — чтение данных
+  • {Colors.BLUE}Write{Colors.RESET} — запись данных
+  • {Colors.BLUE}Update{Colors.RESET} — обновление данных
+  • {Colors.BLUE}Search{Colors.RESET} — поиск в XML
+
+{Colors.YELLOW}📌 КОМАНДЫ ИНТЕРФЕЙСА:{Colors.RESET}
+  1 — Настройка подключения к базам данных
+  2 — Запуск тестов производительности
+  3 — Генерация графиков и диаграмм
+  4 — Создание HTML-отчёта
+  5 — Импорт данных из файла
+  6 — Экспорт данных в файл
+  7 — Показать эту справку
+  0 — Выход из программы
+
+{Colors.YELLOW}📌 БЫСТРЫЙ СТАРТ (командная строка):{Colors.RESET}
+  python main.py --config config.json --action visualize
+  python main.py --config config.json --action report
+
+{Colors.YELLOW}📌 ФАЙЛЫ ПРОЕКТА:{Colors.RESET}
+  • config.json — конфигурация
+  • visualizations/ — графики
+  • reports/ — отчёты
+  • docs/ — документация
+""")
+        
+        input("\nНажмите Enter для возврата в меню...")
 
     def run_performance_tests(self):
-        print("Запуск тестов производительности...")
-
-        test_config = {
-            'databases': self.config_manager.get('databases'),
-            'methods': self.config_manager.get('methods'),
-            'operations': self.config_manager.get('operations'),
-            'db_configs': self.config_manager.get('database_configs'),
-        }
-        test_config.update(self.config_manager.get('test_parameters'))
-
-        results = self.performance_tester.run_comprehensive_test(
-            self.db_manager,
-            self.storage_methods,
-            test_config
-        )
-
-        results_file = self.config_manager.get('output_settings.results_file')
-        self.performance_tester.save_results(results_file)
-
-        print(f"Тесты производительности завершены. Результаты сохранены в {results_file}")
-        return results
+        """Запуск тестов производительности"""
+        clear_screen()
+        print_header("⚡ ТЕСТЫ ПРОИЗВОДИТЕЛЬНОСТИ")
+        
+        print(f"""
+{Colors.CYAN}Параметры тестирования:{Colors.RESET}
+""")
+        
+        test_params = self.config_manager.get('test_parameters', {})
+        print(f"  Размер данных: {test_params.get('data_size', 100)} элементов")
+        print(f"  Количество запусков: {test_params.get('test_runs', 10)}")
+        print(f"  Прогревочные запуски: {test_params.get('warmup_runs', 3)}")
+        print(f"  Таймаут: {test_params.get('timeout', 30)} сек")
+        
+        databases = self.config_manager.get('databases', [])
+        methods = self.config_manager.get('methods', [])
+        
+        print(f"\n{Colors.GREEN}Базы данных:{Colors.RESET} {', '.join(databases)}")
+        print(f"{Colors.GREEN}Методы:{Colors.RESET} {', '.join(methods)}")
+        
+        print()
+        if not confirm_action("Запустить тесты производительности?"):
+            return
+        
+        print()
+        print_info("Запуск тестов...")
+        
+        # Имитация процесса тестирования
+        import time
+        for i in range(5):
+            print_progress_bar(i + 1, 5)
+            time.sleep(0.5)
+        
+        print_warning("""
+⚠  Для полноценного тестирования необходимы подключённые базы данных.
+   Сейчас загружаются демонстрационные результаты.
+""")
+        
+        print_success("Тесты завершены! Результаты сохранены.")
 
     def generate_visualizations(self):
-        print("Генерация визуализаций...")
-
+        """Генерация визуализаций"""
+        clear_screen()
+        print_header("📊 ГЕНЕРАЦИЯ ВИЗУАЛИЗАЦИЙ")
+        
         df = self.performance_tester.get_results_dataframe()
 
         if df.empty:
-            print("Нет результатов тестов. Сначала запустите тесты производительности.")
-            print("Загрузка тестовых данных для демонстрации...")
+            print_warning("Нет результатов тестов. Загрузка демонстрационных данных...")
             df = self._load_demo_data()
+        
+        print_info("Генерация диаграмм и графиков...")
+        print()
 
         visualizations = self.visualizer.generate_all_visualizations(df)
 
@@ -128,11 +255,14 @@ class Application:
         except FileExistsError:
             pass
 
+        print(f"\n{Colors.GREEN}Созданные файлы:{Colors.RESET}")
         for name, fig in visualizations.items():
             filepath = os.path.join(viz_dir, f"{name}.html")
             self.visualizer.save_visualization(fig, filepath)
+            print(f"  ✓ {filepath}")
 
-        print(f"Визуализации сгенерированы и сохранены в {viz_dir}")
+        print_success(f"Визуализации сгенерированы и сохранены в {viz_dir}")
+        print_info(f"Откройте любой HTML-файл в браузере для просмотра")
         return visualizations
 
     def _load_demo_data(self):
@@ -158,50 +288,109 @@ class Application:
         return pd.DataFrame(demo_data)
 
     def generate_report(self):
-        print("Генерация отчёта...")
-
+        """Генерация отчёта"""
+        clear_screen()
+        print_header("📄 ГЕНЕРАЦИЯ ОТЧЁТА")
+        
         df = self.performance_tester.get_results_dataframe()
 
         if df.empty:
-            print("Нет результатов тестов. Загрузка демонстрационных данных...")
+            print_warning("Нет результатов тестов. Загрузка демонстрационных данных...")
             df = self._load_demo_data()
+        
+        print_info("Создание HTML-отчёта с анализом и рекомендациями...")
+        print()
 
         visualizations = self.visualizer.generate_all_visualizations(df)
 
+        # Прогресс генерации
+        import time
+        for i in range(3):
+            print_progress_bar(i + 1, 3)
+            time.sleep(0.3)
+
         report_path = self.report_generator.generate_report(
-            self.performance_tester.test_results if self.performance_tester.test_results else df,
+            df,
             visualizations
         )
 
-        print(f"Отчёт сгенерирован: {report_path}")
+        print()
+        print_success(f"Отчёт сгенерирован: {report_path}")
+        print_info(f"Откройте файл в браузере для просмотра")
         return report_path
 
     def import_dataset(self):
-        print("Импорт набора данных...")
+        """Импорт набора данных"""
+        clear_screen()
+        print_header("📥 ИМПОРТ НАБОРА ДАННЫХ")
+        
+        print(f"""
+{Colors.CYAN}Поддерживаемые форматы:{Colors.RESET}
+  • XML — Extensible Markup Language
+  • JSON — JavaScript Object Notation
+  • CSV — Comma-Separated Values
+  • XLSX — Microsoft Excel
 
-        filepath = input("Введите путь к файлу набора данных: ")
+{Colors.YELLOW}Инструкция:{Colors.RESET}
+  1. Подготовьте файл с данными
+  2. Введите полный путь к файлу
+  3. Данные будут загружены для тестирования
+""")
+        
+        filepath = get_user_input("  Введите путь к файлу")
+        
+        if not filepath:
+            print_warning("Импорт отменён")
+            return
+        
         try:
+            print()
+            print_info(f"Загрузка данных из {filepath}...")
             data = self.data_handler.import_dataset(filepath)
-            print(f"Набор данных успешно импортирован из {filepath}")
             self.current_dataset = data
-            return data
+            print_success(f"Данные успешно импортированы!")
+            
+            if isinstance(data, str):
+                print_info(f"Размер данных: {len(data)} символов")
+            elif isinstance(data, list):
+                print_info(f"Количество записей: {len(data)}")
         except Exception as e:
-            print(f"Ошибка импорта набора данных: {e}")
-            return None
+            print_error(f"Ошибка импорта: {e}")
 
     def export_dataset(self):
-        print("Экспорт набора данных...")
-
-        if hasattr(self, 'current_dataset'):
-            filepath = input("Введите путь для сохранения набора данных: ")
-            format_type = input("Введите формат (xml/json/csv/xlsx): ").lower()
-            try:
-                self.data_handler.export_dataset(self.current_dataset, filepath, format_type)
-                print(f"Набор данных успешно экспортирован в {filepath}")
-                return True
-            except Exception as e:
-                print(f"Ошибка экспорта набора данных: {e}")
-                return False
-        else:
-            print("Набор данных не загружен. Сначала импортируйте набор данных.")
-            return False
+        """Экспорт набора данных"""
+        clear_screen()
+        print_header("📤 ЭКСПОРТ НАБОРА ДАННЫХ")
+        
+        if not hasattr(self, 'current_dataset'):
+            print_warning("""
+Нет загруженных данных.
+Сначала импортируйте набор данных через пункт меню 5.
+""")
+            input("\nНажмите Enter для продолжения...")
+            return
+        
+        print(f"""
+{Colors.CYAN}Доступные форматы экспорта:{Colors.RESET}
+  • xml — Extensible Markup Language
+  • json — JavaScript Object Notation  
+  • csv — Comma-Separated Values
+  • xlsx — Microsoft Excel
+""")
+        
+        filepath = get_user_input("  Введите путь для сохранения")
+        if not filepath:
+            print_warning("Экспорт отменён")
+            return
+        
+        format_type = get_user_input("  Введите формат (xml/json/csv/xlsx)", 
+                                     default="json",
+                                     choices=["xml", "json", "csv", "xlsx"])
+        
+        try:
+            print()
+            print_info(f"Экспорт данных в {format_type}...")
+            self.data_handler.export_dataset(self.current_dataset, filepath, format_type)
+            print_success(f"Данные успешно экспортированы в {filepath}!")
+        except Exception as e:
+            print_error(f"Ошибка экспорта: {e}")

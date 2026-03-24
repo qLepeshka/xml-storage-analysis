@@ -13,8 +13,14 @@ import matplotlib
 matplotlib.use('Agg')
 
 from app.application import Application
+from app.ui_utils import print_logo, print_info, Colors
 
 def main():
+    # Приветственное сообщение
+    print_logo()
+    print_info("Запуск приложения...")
+    print()
+    
     app = Application()
     app.run()
 
