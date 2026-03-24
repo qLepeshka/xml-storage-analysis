@@ -1,0 +1,36 @@
+{
+  "databases": ["postgresql", "mysql"],
+  "methods": [
+    "native_text",
+    "normalized_relational",
+    "xml_datatype"
+  ],
+  "operations": ["read", "write", "search"],
+  "test_parameters": {
+    "data_size": 50,
+    "test_runs": 5,
+    "warmup_runs": 2,
+    "timeout": 30
+  },
+  "database_configs": {
+    "postgresql": {
+      "host": "localhost",
+      "port": 5432,
+      "database": "xml_test",
+      "username": "postgres",
+      "password": "password"
+    },
+    "mysql": {
+      "host": "localhost",
+      "port": 3306,
+      "database": "xml_test",
+      "username": "root",
+      "password": "password"
+    }
+  },
+  "output_settings": {
+    "results_file": "results/test_results.csv",
+    "report_dir": "reports/",
+    "visualization_dir": "visualizations/"
+  }
+}
