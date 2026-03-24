@@ -9,7 +9,8 @@ from app.config_manager import ConfigManager
 from app.ui_utils import (
     Colors, print_logo, print_header, print_success, print_error,
     print_warning, print_info, print_menu_item, print_table,
-    get_user_input, confirm_action, simulate_loading, clear_screen
+    get_user_input, confirm_action, simulate_loading, clear_screen,
+    print_progress_bar
 )
 
 
