@@ -1,9 +1,10 @@
 {
-  "databases": ["postgresql", "mysql"],
+  "databases": ["postgresql", "mysql", "sqlite_demo"],
   "methods": [
     "native_text",
     "normalized_relational",
-    "xml_datatype"
+    "xml_datatype",
+    "hybrid"
   ],
   "operations": ["read", "write", "search"],
   "test_parameters": {
@@ -26,11 +27,21 @@
       "database": "xml_test",
       "username": "root",
       "password": "password"
+    },
+    "sqlite_demo": {
+      "database_path": "demo_data.db",
+      "description": "Демонстрационная база данных SQLite с тестовыми данными"
     }
   },
   "output_settings": {
     "results_file": "results/test_results.csv",
     "report_dir": "reports/",
     "visualization_dir": "visualizations/"
+  },
+  "demo_mode": {
+    "enabled": true,
+    "auto_initialize": true,
+    "sample_data_count": 5,
+    "performance_test_runs": 3
   }
 }
